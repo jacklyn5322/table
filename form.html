@@ -74,7 +74,7 @@
       payload.append("chapter", chapterEl.value);
       payload.append("weight", document.getElementById("weight").value);
 
-      fetch("/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbxma8QU162q49DpqV84SVez0qNX8KaUSUdVLqs4indJIbcxZuBSfwzQmO5VHksxIfJu7g/exec", {
         method: "POST",
         body: payload
       }).then(res => res.text()).then(res => {
