@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>撿拾菸蒂重量回報表單</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 500px; margin: auto; }
+    label { display: block; margin-top: 1rem; }
+    select, input { width: 100%; padding: 0.5rem; font-size: 1rem; margin-top: 0.5rem; }
+    button { margin-top: 2rem; padding: 0.75rem; width: 100%; font-size: 1.1rem; }
+    #status { margin-top: 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>撿拾菸蒂重量回報表單</h2>
+  <label>區域：<select id="region"></select></label>
+  <label>小區：<select id="subregion"></select></label>
+  <label>分會：<select id="chapter"></select></label>
+  <label>菸蒂重量（公克）：<input type="number" id="weight" min="0" /></label>
+  <button onclick="handleSubmit()">送出</button>
+  <div id="status"></div>
+
+  <script>
+    const data = {
+      "東區": {"花東縣市區": ["花蓮", "光復", "台東"]},
+      "北區": {
+        "基宜縣市區": ["基隆", "羅東", "蘇澳港", "宜蘭", "頭城", "雨港", "四維", "雞籠山"],
+        "台北市區": ["台北市", "首府", "陽明山", "台北女", "大安", "長春", "中山", "四海", "龍山", "大同", "士林", "北投", "大松山", "文山", "城中"],
+        "新北市區": ["永和", "三重", "新莊", "板橋", "中和", "新北", "樹林", "土城", "泰山", "淡水", "三峽", "鶯歌", "蘆洲", "新店", "雙和", "汐止", "汐科"]
+      },
+      "桃竹苗區": {
+        "桃園市區": ["桃園", "中壢", "楊梅", "平鎮", "龍潭", "大溪", "虎頭山", "桃園女", "大園", "八德", "一德", "埔心"],
+        "竹苗縣市區": ["新竹", "苗栗", "竹東", "新竹女", "山城", "竹北", "頭份", "風城", "湖口"]
+      },
+      "中區": {
+        "台中市一區": ["台中", "大墩", "合作", "臺中女", "亞哥", "中友", "文化城", "文心", "英才", "東峰"],
+        "台中市二區": ["豐原", "台中港", "潭子", "大甲", "沙鹿", "大里", "霧峰", "大雅", "東勢", "太平", "太平女", "后里", "梧棲", "外埔", "神岡", "龍井"],
+        "彰化縣市區": ["彰化", "員林", "二林", "北斗", "溪湖", "鹿港", "田中", "中正", "和美", "花壇", "大彰"],
+        "南投縣市區": ["南投", "埔里", "竹山", "水里", "草屯", "名間", "南投女", "南崗"]
+      },
+      "南區": {
+        "雲嘉縣市區": ["嘉義", "雲林", "虎尾", "西螺", "北港", "民雄", "玉山", "大林", "莿桐"],
+        "台南市區": ["台南", "新化", "成功", "鳳凰城", "新營", "仁德", "府城", "永康", "安南", "台南女", "古都", "金城", "南科", "菁英"],
+        "高市金澎區": ["高雄", "澎湖", "巨港", "高雄女", "博愛", "西子灣", "左營", "春秋閣", "金門", "柴山", "南星", "高都"],
+        "高屏縣市區": ["屏東", "岡山", "鳳山", "潮州", "東港", "大崗山", "漯底山", "太陽城", "阿公店"]
+      }
+    };
+
+    const regionEl = document.getElementById("region");
+    const subregionEl = document.getElementById("subregion");
+    const chapterEl = document.getElementById("chapter");
+
+    for (const region in data) regionEl.options.add(new Option(region, region));
+
+    regionEl.onchange = () => {
+      subregionEl.innerHTML = chapterEl.innerHTML = "";
+      const subs = Object.keys(data[regionEl.value] || {});
+      subs.forEach(sr => subregionEl.options.add(new Option(sr, sr)));
+      if (subs.length) {
+        subregionEl.value = subs[0];
+        subregionEl.onchange();
+      }
+    };
+
+    subregionEl.onchange = () => {
+      chapterEl.innerHTML = "";
+      (data[regionEl.value]?.[subregionEl.value] || []).forEach(ch => chapterEl.options.add(new Option(ch, ch)));
+    };
+
+    function handleSubmit() {
+      const payload = new URLSearchParams();
+      payload.append("region", regionEl.value);
+      payload.append("subregion", subregionEl.value);
+      payload.append("chapter", chapterEl.value);
+      payload.append("weight", document.getElementById("weight").value);
+
+      fetch("/exec", {
+        method: "POST",
+        body: payload
+      }).then(res => res.text()).then(res => {
+        document.getElementById("status").innerText = "✅ 回報成功";
+        document.getElementById("weight").value = "";
+      }).catch(() => {
+        document.getElementById("status").innerText = "❌ 發送失敗";
+      });
+    }
+
+    regionEl.selectedIndex = 0;
+    regionEl.onchange();
+  </script>
+</body>
+</html>
