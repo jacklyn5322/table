@@ -31,9 +31,6 @@
     <label>合作單位名稱（可輸入中英文）：<input type="text" id="partnerName" /></label>
   </div>
 
-  <!-- 🔼 新增上傳圖片影片欄位 -->
-  <label>上傳圖片或影片（可多筆）：<input type="file" id="mediaFiles" multiple /></label>
-
   <button onclick="handleSubmit()">送出</button>
   <div id="status"></div>
 
@@ -89,43 +86,28 @@
       document.getElementById("partnerNameField").style.display = value === "是" ? "block" : "none";
     }
 
-    // ⬇️ 新的 handleSubmit，支援多檔案上傳
     function handleSubmit() {
-      const region = regionEl.value;
-      const subregion = subregionEl.value;
-      const chapter = chapterEl.value;
       const weightKg = parseFloat(document.getElementById("weightKg").value);
-      const weight = Math.round(weightKg * 1000);
-      const hasPartner = document.getElementById("hasPartner").value;
-      const partnerName = document.getElementById("partnerName").value || "";
-      const files = document.getElementById("mediaFiles").files;
+      const weight = Math.round(weightKg * 1000); // 轉成公克
 
-      const formData = new FormData();
-      formData.append("region", region);
-      formData.append("subregion", subregion);
-      formData.append("chapter", chapter);
-      formData.append("weight", weight);
-      formData.append("hasPartner", hasPartner);
-      formData.append("partnerName", partnerName);
+      const payload = new URLSearchParams();
+      payload.append("region", regionEl.value);
+      payload.append("subregion", subregionEl.value);
+      payload.append("chapter", chapterEl.value);
+      payload.append("weight", weight); // 寫入公斤
+      payload.append("hasPartner", document.getElementById("hasPartner").value);
+      payload.append("partnerName", document.getElementById("partnerName").value || "");
 
-      for (let i = 0; i < files.length; i++) {
-        formData.append("mediaFiles", files[i]);
-      }
-
-      fetch("https://script.google.com/macros/s/AKfycbzXyO-5yXvjGLZE5N_bdtVYDEn6HIIrjM1JHPu1R0ojn8s94UwshF3_itHiZoNq0QO34A/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbyao4gsTwAwY_GvXyANdNpQ0TqF8Zxd5AXRtRI02tA8pxBCA11LgSCSEeC4rBmxNQ-oXQ/exec", {
         method: "POST",
-        body: formData,
-      })
-      .then(res => res.text())
-      .then(res => {
+        body: payload
+      }).then(res => res.text()).then(res => {
         document.getElementById("status").innerText = "✅ 填寫成功";
         document.getElementById("weightKg").value = "";
         document.getElementById("hasPartner").value = "";
         document.getElementById("partnerName").value = "";
-        document.getElementById("mediaFiles").value = "";
-        togglePartnerField();
-      })
-      .catch(() => {
+        togglePartnerField(); // 隱藏欄位
+      }).catch(() => {
         document.getElementById("status").innerText = "❌ 發送失敗";
       });
     }
