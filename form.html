@@ -98,7 +98,7 @@
       payload.append("hasPartner", document.getElementById("hasPartner").value);
       payload.append("partnerName", document.getElementById("partnerName").value || "");
 
-      fetch("https://script.google.com/macros/s/AKfycbxJcB9h7l1njQvCHMniQygIeH1GZJLuEs-6_-7FYI-UBv8-nOUgJt-vuu0Fl5KCceAKHA/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbzO2OPR0eCwfAt8DYzr2ypDzzGq6hIBH7642qGHKMTgKwUd5gkQ_cTEgKqAsftJyy_YcA/exec", {
         method: "POST",
         body: payload
       }).then(res => res.text()).then(res => {
